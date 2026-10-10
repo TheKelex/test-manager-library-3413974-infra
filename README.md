@@ -93,6 +93,35 @@ Después de migrar, aprovisiona de forma idempotente el administrador configurad
 docker compose --env-file infra\.env -f infra\compose.yaml exec api php artisan library:bootstrap-admin
 ```
 
+## T-21 a T-23 — cierre y demostración
+
+El panel de gestión está disponible en `http://localhost:5173`; el sitio estático de presentación
+se sirve independientemente en `http://localhost:8080`.
+
+Después de migrar y aprovisionar el administrador, carga datos de demostración con el servicio
+puntual `tool`:
+
+```powershell
+docker compose --profile tools --env-file infra\.env -f infra\compose.yaml run --build --rm tool
+```
+
+La herramienta autentica contra la API y crea/reutiliza libros y socios identificados, registra
+préstamos y verifica los resultados consultando la API normal. No accede directamente a PostgreSQL.
+El servicio `api-demo`, disponible solo en el perfil `tools`, usa el instante de demostración de
+`DEMO_LIBRARY_TIME` para crear préstamos históricos a través del mismo contrato HTTP; la API
+principal los muestra como vencidos según el reloj real. El valor de ejemplo permite probar el
+reporte con el rango del año 2020. El panel puede recorrer catálogo, socios, préstamos,
+devoluciones, vencidos e informe con estos datos.
+
+Para validar el frontend de producción desde su contenedor:
+
+```powershell
+docker compose --env-file infra\.env -f infra\compose.yaml exec app npm run build
+```
+
+El sitio de presentación no realiza solicitudes a la API. Se puede iniciar únicamente ese
+servicio con `docker compose --env-file infra\.env -f infra\compose.yaml up -d page`.
+
 El arranque de Compose no ejecuta estos comandos por sí solo. PostgreSQL conserva sus datos en un
 volumen persistente; no usar `down -v` como parte del flujo rutinario.
 
