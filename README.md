@@ -49,3 +49,38 @@ antes de las 3:00 p. m.**: no se presenta nada que no esté en GitHub.
 | [`test-manager-library-3413974-page`](https://github.com/code-sena/test-manager-library-3413974-page) | Sitio público estático de presentación |
 | [`test-manager-library-3413974-infra`](https://github.com/code-sena/test-manager-library-3413974-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
 | [`test-manager-library-3413974-tool`](https://github.com/code-sena/test-manager-library-3413974-tool) | Utilidades: sembrador de datos de demostración |
+
+## T-01 — Arranque del esqueleto
+
+El entorno inicial se define en `compose.yaml`: API Laravel y PostgreSQL 16. La base arranca vacía;
+no se ejecutan migraciones ni seeders al iniciar los contenedores.
+
+1. Copia `.env.example` como `.env` en esta carpeta y cambia `POSTGRES_PASSWORD`. La `APP_KEY`
+   incluida sirve solo para desarrollo local; debe reemplazarse en cualquier entorno persistente.
+2. Desde la raíz del repositorio, construye y arranca los servicios:
+
+   ```powershell
+   Copy-Item infra\.env.example infra\.env
+   docker compose --env-file infra\.env -f infra\compose.yaml up --build
+   ```
+
+3. En otra terminal, verifica el endpoint:
+
+   ```powershell
+   Invoke-RestMethod http://localhost:8000/health
+   ```
+
+   La respuesta debe ser `{"status":"ok"}`. Las pruebas HTTP de Laravel también se ejecutan dentro
+   del contenedor:
+
+   ```powershell
+   docker compose --env-file infra\.env -f infra\compose.yaml exec api php artisan test
+   ```
+
+Para detener los servicios sin borrar los datos persistidos:
+
+```powershell
+docker compose --env-file infra\.env -f infra\compose.yaml down
+```
+
+No se debe usar `down -v` salvo que se quiera eliminar explícitamente el volumen de PostgreSQL.
