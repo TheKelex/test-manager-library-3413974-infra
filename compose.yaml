@@ -32,6 +32,7 @@ services:
       DB_DATABASE: ${POSTGRES_DB:-manager_library}
       DB_USERNAME: ${POSTGRES_USER:-manager_library}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Copy infra/.env.example to infra/.env and set POSTGRES_PASSWORD}
+      DB_SCHEMA_PATH: ${DB_SCHEMA_PATH:-library,public}
     volumes:
       - ../api:/var/www/html
       - api_vendor:/var/www/html/vendor

@@ -56,7 +56,8 @@ El entorno inicial se define en `compose.yaml`: API Laravel y PostgreSQL 16. La 
 no se ejecutan migraciones ni seeders al iniciar los contenedores.
 
 1. Copia `.env.example` como `.env` en esta carpeta y cambia `POSTGRES_PASSWORD`. La `APP_KEY`
-   incluida sirve solo para desarrollo local; debe reemplazarse en cualquier entorno persistente.
+   de ejemplo es pública y sirve solo para desarrollo local; reemplázala por una generada para
+   cualquier entorno persistente.
 2. Desde la raíz del repositorio, construye y arranca los servicios:
 
    ```powershell
@@ -76,6 +77,14 @@ no se ejecutan migraciones ni seeders al iniciar los contenedores.
    ```powershell
    docker compose --env-file infra\.env -f infra\compose.yaml exec api php artisan test
    ```
+
+Las migraciones y la semilla de categorías se aplican explícitamente cuando T-02 está lista:
+
+```powershell
+docker compose --env-file infra\.env -f infra\compose.yaml exec api php artisan migrate --seed --force
+```
+
+El arranque de Compose no ejecuta este comando por sí solo.
 
 Para detener los servicios sin borrar los datos persistidos:
 
