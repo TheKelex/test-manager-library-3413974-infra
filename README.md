@@ -55,9 +55,9 @@ antes de las 3:00 p. m.**: no se presenta nada que no esté en GitHub.
 El entorno inicial se define en `compose.yaml`: API Laravel y PostgreSQL 16. La base arranca vacía;
 no se ejecutan migraciones ni seeders al iniciar los contenedores.
 
-1. Copia `.env.example` como `.env` en esta carpeta y cambia `POSTGRES_PASSWORD`. La `APP_KEY`
-   de ejemplo es pública y sirve solo para desarrollo local; reemplázala por una generada para
-   cualquier entorno persistente.
+1. Copia `.env.example` como `.env` en esta carpeta y reemplaza `POSTGRES_PASSWORD`,
+   `JWT_SECRET`, `ADMIN_PASSWORD` y `APP_KEY` por valores locales. `JWT_SECRET` debe tener al
+   menos 32 caracteres. El archivo `.env` no se versiona.
 2. Desde la raíz del repositorio, construye y arranca los servicios:
 
    ```powershell
@@ -78,13 +78,23 @@ no se ejecutan migraciones ni seeders al iniciar los contenedores.
    docker compose --env-file infra\.env -f infra\compose.yaml exec api php artisan test
    ```
 
+   El esqueleto React queda disponible en `http://localhost:5173`. Compose no ejecuta migraciones
+   ni crea el administrador automáticamente.
+
 Las migraciones y la semilla de categorías se aplican explícitamente cuando T-02 está lista:
 
 ```powershell
 docker compose --env-file infra\.env -f infra\compose.yaml exec api php artisan migrate --seed --force
 ```
 
-El arranque de Compose no ejecuta este comando por sí solo.
+Después de migrar, aprovisiona de forma idempotente el administrador configurado en el entorno:
+
+```powershell
+docker compose --env-file infra\.env -f infra\compose.yaml exec api php artisan library:bootstrap-admin
+```
+
+El arranque de Compose no ejecuta estos comandos por sí solo. PostgreSQL conserva sus datos en un
+volumen persistente; no usar `down -v` como parte del flujo rutinario.
 
 Para detener los servicios sin borrar los datos persistidos:
 
